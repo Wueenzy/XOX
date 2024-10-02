@@ -8,7 +8,8 @@
 using namespace std;
 
 utils aiUtils;
-fstream sModel("model.txt", sModel.out | sModel.app);
+fstream sModelIN("model.txt");
+fstream sModelOUT("model.txt", sModelOUT.out | sModelOUT.app);
 
 //Board'ı kaydedilip okunabilecek bir biçime çevirir.
 string recoverBoard(char** board){
@@ -23,6 +24,11 @@ string recoverBoard(char** board){
 char** unrecoverBoard(string aiBoard){
   char** board;
   
+  board = new char*[3];
+  for(int i = 0; i < 3; i++){
+    board[i] = new char[3];
+  } 
+
   for(int i = 0; i < 3; i++){
     for(int j = 0; j < 3; j++){
       board[i][j] = aiBoard[i*3+j];
@@ -46,6 +52,7 @@ private:
   vector<string> currentGame;
   vector<string> preGame;
   bool turn = true;
+  string now;
 public:
   void setBoard(char**);
   char** makeMove(char**, char, bool useBrain = false);
@@ -66,7 +73,9 @@ void ai::setBoard(char** _board){
 //Yapay zeka hamlesini yapar ve kayıt eder.
 char** ai::makeMove(char** _board, char player, bool useBrain){
   if(useBrain == true){
-    string now = recoverBoard(_board);
+    now = recoverBoard(_board);
+    bestValue = 0;
+    bestString = now;
     for(int i = 0; i < 9;i++){
       if(now[i] == '_'){
         now[i] = player;
@@ -77,9 +86,10 @@ char** ai::makeMove(char** _board, char player, bool useBrain){
         now[i] = '_';
       }
     }
-    if(now != recoverBoard(_board)){
-      setBoard(unrecoverBoard(now));
-      return unrecoverBoard(now);
+    if(bestString != recoverBoard(_board)){
+      board = unrecoverBoard(bestString);
+      setBoard(board);
+      return board;
     }
   }
 
@@ -117,7 +127,7 @@ char** ai::winGame(){
 
 char** ai::loseGame(){
   for(auto var : currentGame) {
-    model[var] -= 0.5;
+    model[var] -= 1;
   }
 
   for(int i = 0; i < 3; i++){
@@ -153,13 +163,13 @@ char** ai::drawGame(){
 
 void ai::saveModel(){
   for(auto pair : model) {
-    sModel << pair.first << ":" << pair.second << endl;
+    sModelOUT << pair.first << ":" << pair.second << endl;
   }
 }
 
 void ai::loadModel(){
   string line;
-  while(getline(sModel, line)){
+  while(getline(sModelIN, line)){
     int pos = line.find(":");
     model[line.substr(0,9)] = stof(line.substr(pos+1));
   }

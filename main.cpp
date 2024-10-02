@@ -75,7 +75,7 @@ int main(){
         cout << "Berabere" << endl;
         break;
       }
-      board = ai.makeMove(board, 'O');
+      board = ai.makeMove(board, 'O', true);
       if(utils.checkWin(board)){
         cout << "AI Kazandı!" << endl;
         break;
@@ -84,6 +84,7 @@ int main(){
         cout << "Berabere" << endl;
         break;
       }
+
     }
   } else if (k == 3) {
     system("clear");
@@ -112,7 +113,6 @@ int main(){
       cout << count << endl;
       count++;
       if(count > countFinish){
-        ai.loadModel();
         ai.saveModel();
         break;
       }
