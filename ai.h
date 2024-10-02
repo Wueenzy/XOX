@@ -1,129 +1,166 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <fstream>
-#include <vector>
 #include "utils.h"
+#include <unordered_map>
+#include <vector>
+#include <fstream>
+#include <random>
+#include <time.h>
+#include <string>
 using namespace std;
 
-utils a;
-fstream winModel("winModel.txt", winModel.out | winModel.app);
-fstream drawModel("drawModel.txt", drawModel.out | drawModel.app);
+utils aiUtils;
+fstream sModel("model.txt", sModel.out | sModel.app);
+
+//Board'ı kaydedilip okunabilecek bir biçime çevirir.
+string recoverBoard(char** board){
+  string aiBoard = "";
+  for (int i = 0; i < 9; i++) {
+    aiBoard += board[i/3][i%3];
+  }
+
+  return aiBoard;
+}
+
+char** unrecoverBoard(string aiBoard){
+  char** board;
+  
+  for(int i = 0; i < 3; i++){
+    for(int j = 0; j < 3; j++){
+      board[i][j] = aiBoard[i*3+j];
+    }
+  }
+
+  return board;
+}
+
+random_device rd;
+mt19937 gen(rd());    
+uniform_int_distribution<> distrib(0, 2);
 
 class ai{
 private:
   char** board;
-  string _board;
+  string aiBoard;
+  unordered_map<string,float> model;
+  string bestString = "";
+  float bestValue = 0;
   vector<string> currentGame;
-  vector<string> _winModel;
-  vector<string> _drawModel;
-  bool trueModel = false;
+  vector<string> preGame;
+  bool turn = true;
 public:
   void setBoard(char**);
-  char** makeMove(char** xox, bool ai2 = false, bool realPlayer = false);
-  void readModel();
-  char** readBoard(string a);
-  void writeWin();
-  void writeDraw();
+  char** makeMove(char**, char, bool useBrain = false);
+  char** winGame();
+  char** loseGame();
+  char** drawGame();
+  void saveModel();
+  void loadModel();
 };
 
-void ai::setBoard(char** xox){
-  _board = "";
-  board = xox;
-  for(int i = 0; i < 3; i++){
-    for(int j = 0; j < 3; j++){
-      _board += board[i][j];
-    }
-  }
-  currentGame.push_back(_board);
+//Yapay zekanın içerisine board'ı aktarır.
+void ai::setBoard(char** _board){
+  board = _board;
+  aiBoard = recoverBoard(_board);
+  currentGame.push_back(aiBoard);
 }
 
-char** ai::makeMove(char** xox, bool ai2, bool realPlayer){
-  int rX;
-  int rY;
-  srand((unsigned) time(NULL));
-  board = xox;
-  while (true) {
-    rX = rand()%3;
-    rY = rand()%3;
-    trueModel = false;
-    for(string& a : _winModel){
-      if(trueModel && a != "_________"){
-        board = readBoard(a);
-        setBoard(board);
-        return board;
-      }else{
-        if(_board == a){
-          trueModel = true;
+//Yapay zeka hamlesini yapar ve kayıt eder.
+char** ai::makeMove(char** _board, char player, bool useBrain){
+  if(useBrain == true){
+    string now = recoverBoard(_board);
+    for(int i = 0; i < 9;i++){
+      if(now[i] == '_'){
+        now[i] = player;
+        if(model[now] > bestValue){
+          bestValue = model[now];
+          bestString = now;
         }
+        now[i] = '_';
       }
     }
-    for(string& a : _drawModel){
-      if(trueModel && a != "_________"){
-        board = readBoard(a);
-        setBoard(board);
-        return board;
-      }else{
-        if(_board == a){
-          trueModel = true;
-        }
-      }
-    }
-    if(board[rY][rX] == '_'){
-      if(ai2){
-        if(realPlayer){
-          board[rY][rX] = 'X';
-        }else{
-          board[rX][rY] = 'O';
-        }
-        break;
-      }
+    if(now != recoverBoard(_board)){
+      setBoard(unrecoverBoard(now));
+      return unrecoverBoard(now);
     }
   }
+
+  int valX = distrib(gen);
+  int valY = distrib(gen);
+  while(true){
+    if(_board[valY][valX] == '_'){
+      _board[valY][valX] = player;
+      break;
+    }
+    valX = distrib(gen);
+    valY = distrib(gen);
+  }
+  setBoard(_board);
+  return _board;
+}
+
+char** ai::winGame(){
+  for(auto var : currentGame) {
+    model[var] += 2;
+  }
+
+  for(int i = 0; i < 3; i++){
+    for(int j = 3; j < 3; j++){
+      board[i][j] = '_';
+    }
+  }
+  
+  preGame = currentGame;
+  currentGame.clear();
   setBoard(board);
+
   return board;
 }
 
-string line;
-void ai::readModel(){
-  if (!winModel.is_open()) {
-        cout << "Error opening the file!" << endl;
-  }else {
-    string line;
-    while(getline(winModel, line)){
-      _winModel.push_back(line);
-    }
-    while(getline(drawModel,line)){
-      _drawModel.push_back(line);
-    }
-    cout << "Model başarıyla okundu." << endl;
+char** ai::loseGame(){
+  for(auto var : currentGame) {
+    model[var] -= 0.5;
   }
-}
 
-char** ai::readBoard(string a){
-  char** board_;
-  board_ = new char*[3];
   for(int i = 0; i < 3; i++){
-    board_[i] = new char[3];
+    for(int j = 0; j < 3; j++){
+      board[i][j] = '_';
+    }
   }
   
-  for(int i = 0; i < 9; i++){
-    board_[i/3][i%3] = a[i];
-  }
-
-  return board_;
+  preGame = currentGame;
+  currentGame.clear();
+  setBoard(board);
+  
+  return board;
 }
 
-void ai::writeWin(){
+char** ai::drawGame(){
   for(auto var : currentGame) {
-    winModel << var << endl;
+    model[var] += 1;
   }
+
+  for(int i = 0; i < 3; i++){
+    for(int j = 0; j < 3; j++){
+      board[i][j] = '_';
+    }
+  }
+  
+  preGame = currentGame;
   currentGame.clear();
+  setBoard(board);
+  
+  return board;
 }
 
-void ai::writeDraw(){
-  for(auto var : currentGame){
-    drawModel << var << endl;
+void ai::saveModel(){
+  for(auto pair : model) {
+    sModel << pair.first << ":" << pair.second << endl;
   }
-  currentGame.clear();
+}
+
+void ai::loadModel(){
+  string line;
+  while(getline(sModel, line)){
+    int pos = line.find(":");
+    model[line.substr(0,9)] = stof(line.substr(pos+1));
+  }
 }

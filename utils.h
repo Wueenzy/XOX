@@ -3,17 +3,17 @@ using namespace std;
 
 class utils{
 private:
-  char** board;
   bool turn = true;
 public:
-  void printer();
-  void setBoard(char** xox);
-  char** makeMove(int,int,bool);
-  bool checkWin();
-  bool checkTie();
+  void printer(char** board);
+  char** makeMove(char**,int,int,bool ai = false);
+  bool checkWin(char**);
+  bool checkTie(char**);
 };
 
-void utils::printer(){
+//Board'ı ekrana yazdırır.
+void utils::printer(char** board){
+  system("clear");
   for(int i = 0; i < 3; i++){
     for(int j = 0; j < 3; j++){
       cout << board[i][j] << " ";
@@ -22,24 +22,19 @@ void utils::printer(){
   }
 }
 
-void utils::setBoard(char** xox){
-  board = xox;
-}
-
-char** utils::makeMove(int x, int y,bool ai){
-  if (turn) {
+//Oyunda yapılan hamleyi kaydeder.
+char** utils::makeMove(char** board, int x, int y, bool ai){
+  if(turn || ai){
     board[y][x] = 'X';
   }else{
     board[y][x] = 'O';
-  }
-  if(ai){
-    return board;
   }
   turn = !turn;
   return board;
 }
 
-bool utils::checkWin(){
+//Oyunda kazanıldı mı diye kontrol eder.
+bool utils::checkWin(char** board){
   for(int i = 0; i < 3; i++){
     if(board[i][0] == board[i][1] && board[i][0] == board[i][2] && board[i][0] != '_'){
       return true;
@@ -54,7 +49,8 @@ bool utils::checkWin(){
   return false;
 }
 
-bool utils::checkTie(){
+//Oyunda berabere kalındı mı diye kontrol eder.
+bool utils::checkTie(char** board){
   for(int i = 0; i < 3; i++){
     for(int j = 0; j < 3; j++){
       if(board[i][j] == '_'){
