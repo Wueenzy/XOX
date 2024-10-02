@@ -8,6 +8,7 @@ int main(){
   char** board;
   int x,y,k;
   int count = 0;
+  int countFinish;
   //Boardı oluşturup içerisini doldurur.
   board = new char*[3];
   for(int i = 0;i < 3; i++){
@@ -74,7 +75,7 @@ int main(){
         cout << "Berabere" << endl;
         break;
       }
-      board = ai.makeMove(board, 'O');
+      board = ai.makeMove(board, 'O', true);
       if(utils.checkWin(board)){
         cout << "AI Kazandı!" << endl;
         break;
@@ -83,8 +84,12 @@ int main(){
         cout << "Berabere" << endl;
         break;
       }
+
     }
   } else if (k == 3) {
+    system("clear");
+    cout << "Kaç defa eğitilsin: " << endl;
+    cin >> countFinish;
     while(true){
       board = ai.makeMove(board,'X');
       if(utils.checkWin(board)){
@@ -107,7 +112,7 @@ int main(){
       system("clear");
       cout << count << endl;
       count++;
-      if(count > 10000){
+      if(count > countFinish){
         ai.saveModel();
         break;
       }
