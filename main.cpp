@@ -8,6 +8,7 @@ int main(){
   char** board;
   int x,y,k;
   int count = 0;
+  int countFinish;
   //Boardı oluşturup içerisini doldurur.
   board = new char*[3];
   for(int i = 0;i < 3; i++){
@@ -85,6 +86,9 @@ int main(){
       }
     }
   } else if (k == 3) {
+    system("clear");
+    cout << "Kaç defa eğitilsin: " << endl;
+    cin >> countFinish;
     while(true){
       board = ai.makeMove(board,'X');
       if(utils.checkWin(board)){
@@ -107,7 +111,8 @@ int main(){
       system("clear");
       cout << count << endl;
       count++;
-      if(count > 10000){
+      if(count > countFinish){
+        ai.loadModel();
         ai.saveModel();
         break;
       }
