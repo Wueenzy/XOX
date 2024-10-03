@@ -93,6 +93,7 @@ int main(){
     while(true){
       board = ai.makeMove(board,'X');
       if(utils.checkWin(board)){
+    system("clear");
         count++;
         board = ai.loseGame();
       }
@@ -102,6 +103,7 @@ int main(){
       }
       board = ai.makeMove(board, 'O');
       if(utils.checkWin(board)){
+      board = ai.makeMove(board, 'O', true);
         count++;
         board = ai.winGame();
       }
@@ -109,11 +111,12 @@ int main(){
         count++;
         board = ai.drawGame();
       }
-      system("clear");
-      cout << count << endl;
+      // system("clear");
+      cout << "\r" << count << flush;
       count++;
       if(count > countFinish){
         ai.saveModel();
+        cout << endl << "Done!!" << endl;
         break;
       }
     }
