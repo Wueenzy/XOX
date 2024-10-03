@@ -82,9 +82,9 @@ char** ai::makeMove(char** _board, char player, bool useBrain){
         if(model[now] > bestValue){
           bestValue = model[now];
           if(player == 'O'){
-            bestValue = model[val];
+            bestValue = model[now];
           }else{
-            bestValue = -model[val];
+            bestValue = -model[now];
           }
         }
         now[i] = '_';
