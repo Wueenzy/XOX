@@ -80,16 +80,17 @@ char** ai::makeMove(char** _board, char player, bool useBrain){
       if(now[i] == '_'){
         now[i] = player;
         if(model[now] > bestValue){
-          bestValue = model[now];
           if(player == 'O'){
-            bestValue = model[val];
+            bestValue = model[now];
           }else{
-            bestValue = -model[val];
+            bestValue = -model[now];
           }
+          bestString = now;
         }
         now[i] = '_';
       }
     }
+
     if(bestString != recoverBoard(_board)){
       board = unrecoverBoard(bestString);
       setBoard(board);
@@ -113,7 +114,7 @@ char** ai::makeMove(char** _board, char player, bool useBrain){
 
 char** ai::winGame(){
   for(auto var : currentGame) {
-    model[var] += 2;
+    model[var] += 4;
   }
 
   for(int i = 0; i < 3; i++){

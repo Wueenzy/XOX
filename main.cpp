@@ -91,9 +91,8 @@ int main(){
     cout << "Kaç defa eğitilsin: " << endl;
     cin >> countFinish;
     while(true){
-      board = ai.makeMove(board,'X', true);
+      board = ai.makeMove(board,'X');
       if(utils.checkWin(board)){
-    system("clear");
         count++;
         board = ai.loseGame();
       }
@@ -101,7 +100,7 @@ int main(){
         count++;
         board = ai.drawGame();
       }
-      board = ai.makeMove(board, 'O', true);
+      board = ai.makeMove(board, 'O');
       if(utils.checkWin(board)){
         count++;
         board = ai.winGame();
@@ -110,7 +109,6 @@ int main(){
         count++;
         board = ai.drawGame();
       }
-      // system("clear");
       cout << "\r" << count << flush;
       count++;
       if(count > countFinish){
